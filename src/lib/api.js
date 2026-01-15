@@ -92,4 +92,32 @@ export const cropApi = {
 
     return response.json();
   },
+
+  /**
+   * Get detailed information for a specific food
+   * @param {Object} data - Food name and user profile data
+   * @returns {Promise<Object>} Food details with personalized explanation
+   */
+  getFoodDetails: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/food-details`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        food_name: data.foodName,
+        age: parseInt(data.age),
+        bmi: parseFloat(data.bmi),
+        condition: data.condition,
+        diet: data.diet,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Failed to get food details');
+    }
+
+    return response.json();
+  },
 };

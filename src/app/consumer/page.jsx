@@ -3,17 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Apple, Heart, Loader2, User, TrendingUp } from 'lucide-react';
-import { useNutritionPlan } from '@/lib/hooks';
+import { useNutritionPlan, useFoodDetails } from '@/lib/hooks';
 import NutritionInputModal from '@/components/NutritionInputModal';
 import FoodDetailsModal from '@/components/FoodDetailsModal';
+import { consumerTranslations } from '@/lib/translations/consumerTranslations';
+
+// Custom hook for translation
+const useTranslation = () => {
+  const [currentLang, setCurrentLang] = useState('en');
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('preferred-language') || 'en';
+    setCurrentLang(savedLang);
+
+    const handleLanguageChange = (event) => {
+      setCurrentLang(event.detail);
+    };
+
+    window.addEventListener('languageChange', handleLanguageChange);
+    return () => window.removeEventListener('languageChange', handleLanguageChange);
+  }, []);
+
+  return consumerTranslations[currentLang];
+};
 
 const getFoodImage = async (foodName) => {
-  // Clean the food name - remove parentheses and extra words
   const cleanFoodName = foodName.replace(/\(.*?\)/g, '').trim();
   
   const PEXELS_API_KEY = process.env.NEXT_PUBLIC_PIXELS_API_KEY;
   
-  // Check if API key exists and is valid
   if (PEXELS_API_KEY && PEXELS_API_KEY !== 'YOUR_API_KEY_HERE') {
     try {
       const response = await fetch(
@@ -36,20 +54,19 @@ const getFoodImage = async (foodName) => {
     }
   }
   
-  // Fallback to Unsplash
   return `https://source.unsplash.com/400x300/?${encodeURIComponent(cleanFoodName)},food,meal`;
 };
 
 const getDefaultFoodImage = () => 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80';
 
 export default function ConsumerPageContent() {
+  const t = useTranslation();
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [recommendedFoods, setRecommendedFoods] = useState([]);
   const [selectedFoodDetails, setSelectedFoodDetails] = useState(null);
   const [currentLimit, setCurrentLimit] = useState(4);
   const [foodImages, setFoodImages] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     age: '',
     bmi: '',
@@ -58,6 +75,7 @@ export default function ConsumerPageContent() {
   });
 
   const nutritionMutation = useNutritionPlan();
+  const foodDetailsMutation = useFoodDetails();
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -73,7 +91,7 @@ export default function ConsumerPageContent() {
 
   const handleSubmit = async () => {
     if (!formData.age || !formData.bmi || !formData.condition || !formData.diet) {
-      alert('Please fill in all required fields');
+      alert(t.fillRequired);
       return;
     }
 
@@ -90,15 +108,14 @@ export default function ConsumerPageContent() {
         }));
         setRecommendedFoods(foodsData);
         
-        // Fetch images using Pexels API
         fetchFoodImages(foodsData);
         
         setIsInputModalOpen(false);
       } else {
-        alert('No food recommendations found for the given profile.');
+        alert(t.noRecommendations);
       }
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      alert(`${t.error}: ${error.message}`);
     }
   };
 
@@ -130,18 +147,17 @@ export default function ConsumerPageContent() {
         setRecommendedFoods(foodsData);
         setCurrentLimit(newLimit);
         
-        // Fetch images using Pexels API
         fetchFoodImages(foodsData);
       }
     } catch (error) {
       console.error('Error fetching more foods:', error);
-      alert(`Error: ${error.message}`);
+      alert(`${t.error}: ${error.message}`);
     }
   };
 
   const handleFoodClick = async (food) => {
     if (!formData.age || !formData.bmi || !formData.condition || !formData.diet) {
-      alert('Please provide your health profile first by clicking "Get Personalized Plan"');
+      alert(t.provideHealthProfile);
       return;
     }
 
@@ -149,20 +165,15 @@ export default function ConsumerPageContent() {
     setSelectedFoodDetails(null);
 
     try {
-      // Mock details - replace with actual API call when available
-      const mockDetails = {
-        food_name: food.name,
-        calories: Math.floor(Math.random() * 300) + 100,
-        protein: Math.floor(Math.random() * 20) + 5,
-        carbs: Math.floor(Math.random() * 40) + 10,
-        sugars: Math.floor(Math.random() * 15) + 2,
-        sodium: Math.floor(Math.random() * 200) + 50,
-        cholesterol: Math.floor(Math.random() * 100) + 10,
-        recommendation_reason: `This food is recommended based on your BMI of ${formData.bmi} and ${formData.condition} condition. It provides balanced nutrition suitable for your dietary preference.`,
-        suitability: `Perfect for ${formData.diet} diet. Helps maintain healthy ${formData.condition === 'healthy' ? 'lifestyle' : formData.condition + ' management'}.`
-      };
+      const details = await foodDetailsMutation.mutateAsync({
+        foodName: food.name,
+        age: formData.age,
+        bmi: formData.bmi,
+        condition: formData.condition,
+        diet: formData.diet,
+      });
 
-      setSelectedFoodDetails(mockDetails);
+      setSelectedFoodDetails(details);
     } catch (error) {
       setSelectedFoodDetails({ error: error.message });
     }
@@ -191,15 +202,15 @@ export default function ConsumerPageContent() {
           >
             <div className="mb-4 flex items-center gap-2">
               <Heart className="h-6 w-6 text-rose-400 sm:h-8 sm:w-8" />
-              <span className="text-sm font-medium text-rose-200 sm:text-base">Your Health Companion</span>
+              <span className="text-sm font-medium text-rose-200 sm:text-base">{t.healthCompanion}</span>
             </div>
             
             <h1 className="mb-4 text-4xl font-bold text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              Personalized Nutrition Recommendations
+              {t.heroTitle}
             </h1>
             
             <p className="mb-8 text-lg text-white/90 sm:text-xl md:text-2xl">
-              Get food suggestions tailored to your age, health needs, and dietary preferences.
+              {t.heroSubtitle}
             </p>
 
             <div className="grid grid-cols-3 gap-4 sm:gap-6">
@@ -210,8 +221,8 @@ export default function ConsumerPageContent() {
                 className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm"
               >
                 <User className="mb-2 h-6 w-6 text-white sm:h-8 sm:w-8" />
-                <p className="text-xs font-medium text-white/80 sm:text-sm">Age-Based</p>
-                <p className="text-lg font-bold text-white sm:text-xl">Smart Selection</p>
+                <p className="text-xs font-medium text-white/80 sm:text-sm">{t.ageBased}</p>
+                <p className="text-lg font-bold text-white sm:text-xl">{t.smartSelection}</p>
               </motion.div>
 
               <motion.div
@@ -221,8 +232,8 @@ export default function ConsumerPageContent() {
                 className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm"
               >
                 <TrendingUp className="mb-2 h-6 w-6 text-white sm:h-8 sm:w-8" />
-                <p className="text-xs font-medium text-white/80 sm:text-sm">BMI-Optimized</p>
-                <p className="text-lg font-bold text-white sm:text-xl">Balanced Diet</p>
+                <p className="text-xs font-medium text-white/80 sm:text-sm">{t.bmiOptimized}</p>
+                <p className="text-lg font-bold text-white sm:text-xl">{t.balancedDiet}</p>
               </motion.div>
 
               <motion.div
@@ -232,8 +243,8 @@ export default function ConsumerPageContent() {
                 className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm"
               >
                 <Heart className="mb-2 h-6 w-6 text-white sm:h-8 sm:w-8" />
-                <p className="text-xs font-medium text-white/80 sm:text-sm">Health-Focused</p>
-                <p className="text-lg font-bold text-white sm:text-xl">Your Wellness</p>
+                <p className="text-xs font-medium text-white/80 sm:text-sm">{t.healthFocused}</p>
+                <p className="text-lg font-bold text-white sm:text-xl">{t.yourWellness}</p>
               </motion.div>
             </div>
           </motion.div>
@@ -250,7 +261,7 @@ export default function ConsumerPageContent() {
               transition={{ delay: 0.2 }}
               className="text-2xl font-semibold text-gray-900 sm:text-3xl md:text-4xl"
             >
-              Your Personalized Food Plan
+              {t.personalizedFoodPlan}
             </motion.h2>
 
             <motion.button
@@ -266,10 +277,10 @@ export default function ConsumerPageContent() {
               {nutritionMutation.isPending ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
-                  Processing...
+                  {t.processing}
                 </span>
               ) : (
-                'Get Personalized Plan'
+                t.getPersonalizedPlan
               )}
             </motion.button>
           </div>
@@ -284,7 +295,7 @@ export default function ConsumerPageContent() {
             <div className="text-center">
               <Apple className="mx-auto mb-3 h-12 w-12 text-gray-400 sm:mb-4 sm:h-16 sm:w-16" />
               <p className="text-sm text-gray-600 sm:text-base md:text-lg">
-                Share your health profile to see personalized food recommendations
+                {t.provideProfile}
               </p>
             </div>
           </motion.div>
@@ -311,10 +322,10 @@ export default function ConsumerPageContent() {
                   <div className="p-4 sm:p-5 md:p-6">
                     <h3 className="mb-2 text-lg font-semibold text-gray-900 sm:text-xl">{food.name}</h3>
                     <div className="space-y-1 text-xs text-gray-600 sm:text-sm">
-                      <p><span className="font-medium">Status:</span> {food.category}</p>
-                      <p><span className="font-medium">Note:</span> {food.note}</p>
+                      <p><span className="font-medium">{t.status}:</span> {food.category}</p>
+                      <p><span className="font-medium">{t.note}:</span> {food.note}</p>
                     </div>
-                    <p className="mt-2 text-[10px] font-medium text-emerald-600 sm:mt-3 sm:text-xs">Click for nutritional details →</p>
+                    <p className="mt-2 text-[10px] font-medium text-emerald-600 sm:mt-3 sm:text-xs">{t.clickForDetails}</p>
                   </div>
                 </motion.div>
               ))}
@@ -336,11 +347,11 @@ export default function ConsumerPageContent() {
                 {nutritionMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
-                    Loading More...
+                    {t.loadingMore}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Show More Recommendations
+                    {t.showMore}
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs sm:text-sm">+5</span>
                   </span>
                 )}
@@ -364,7 +375,7 @@ export default function ConsumerPageContent() {
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         foodDetails={selectedFoodDetails}
-        isLoading={false}
+        isLoading={foodDetailsMutation.isPending}
       />
     </div>
   );

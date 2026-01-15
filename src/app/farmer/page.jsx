@@ -6,6 +6,26 @@ import { MapPin, Sprout, Cloud, Droplets, Wind, Loader2 } from 'lucide-react';
 import { useCropRecommendation, useCropDetails } from '@/lib/hooks';
 import CropInputModal from '@/components/CropInputModal';
 import CropDetailsModal from '@/components/CropDetailsModal';
+import { farmerTranslations } from '@/lib/translations/farmerTranslations';
+
+// Custom hook for translation
+const useTranslation = () => {
+  const [currentLang, setCurrentLang] = useState('en');
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('preferred-language') || 'en';
+    setCurrentLang(savedLang);
+
+    const handleLanguageChange = (event) => {
+      setCurrentLang(event.detail);
+    };
+
+    window.addEventListener('languageChange', handleLanguageChange);
+    return () => window.removeEventListener('languageChange', handleLanguageChange);
+  }, []);
+
+  return farmerTranslations[currentLang];
+};
 
 const getCropImage = async (cropName) => {
   const PEXELS_API_KEY = process.env.NEXT_PUBLIC_PIXELS_API_KEY; 
@@ -36,6 +56,7 @@ const getCropImage = async (cropName) => {
 const getDefaultCropImage = () => 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=400&q=80';
 
 export default function FarmerPageContent() {
+  const t = useTranslation();
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [recommendedCrops, setRecommendedCrops] = useState([]);
@@ -71,7 +92,7 @@ export default function FarmerPageContent() {
 
   const getUserLocation = () => {
     if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser');
+      setLocationError(t.unableToGetLocation);
       setLoading(false);
       return;
     }
@@ -84,7 +105,7 @@ export default function FarmerPageContent() {
       },
       (error) => {
         console.error('Error getting location:', error);
-        setLocationError('Unable to get your location. Using Bhubaneswar.');
+        setLocationError(t.unableToGetLocation);
         setLocation({ latitude: 20.2961, longitude: 85.8245 });
         fetchWeatherData(20.2961, 85.8245);
       }
@@ -186,7 +207,7 @@ export default function FarmerPageContent() {
 
   const handleSubmit = async () => {
     if (!formData.temperature || !formData.humidity || !formData.soilMoisture || !formData.soilType) {
-      alert('Please fill in all required fields (Temperature, Humidity, Soil Moisture, and Soil Type)');
+      alert(t.fillRequired);
       return;
     }
 
@@ -199,8 +220,8 @@ export default function FarmerPageContent() {
           id: `crop-${Date.now()}-${index}`,
           name: cropName.charAt(0).toUpperCase() + cropName.slice(1),
           rawName: cropName.toLowerCase(),
-          season: 'Recommended',
-          yield: 'Optimized for your conditions',
+          season: t.recommended,
+          yield: t.optimizedConditions,
         }));
         setRecommendedCrops(cropsData);
         
@@ -208,7 +229,7 @@ export default function FarmerPageContent() {
         
         setIsInputModalOpen(false);
       } else {
-        alert('No crop recommendations found for the given conditions.');
+        alert(t.noRecommendations);
       }
     } catch (error) {
       alert(`Error: ${error.message}`);
@@ -238,8 +259,8 @@ export default function FarmerPageContent() {
           id: `crop-${Date.now()}-${index}`,
           name: cropName.charAt(0).toUpperCase() + cropName.slice(1),
           rawName: cropName.toLowerCase(),
-          season: 'Recommended',
-          yield: 'Optimized for your conditions',
+          season: t.recommended,
+          yield: t.optimizedConditions,
         }));
         setRecommendedCrops(cropsData);
         setCurrentLimit(newLimit);
@@ -254,7 +275,7 @@ export default function FarmerPageContent() {
 
   const handleCropClick = async (crop) => {
     if (!formData.temperature || !formData.humidity || !formData.soilMoisture || !formData.soilType) {
-      alert('Please provide environmental data first by clicking "Get Crop Suggestions"');
+      alert(t.provideDataFirst);
       return;
     }
 
@@ -305,7 +326,7 @@ export default function FarmerPageContent() {
             <div className="flex items-center gap-2 text-white">
               <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="text-sm font-medium sm:text-base md:text-lg">
-                {loading ? 'Getting your location...' : weatherData?.name || 'Your Location'}
+                {loading ? t.gettingLocation : weatherData?.name || t.location}
               </span>
             </div>
             {locationError && (
@@ -332,7 +353,7 @@ export default function FarmerPageContent() {
                     </span>
                     <div className="text-white/90">
                       <p className="text-sm capitalize sm:text-base md:text-lg">{weatherData?.weather?.[0]?.description}</p>
-                      <p className="text-xs sm:text-sm">Feels like {Math.round(weatherData?.main?.feels_like)}°</p>
+                      <p className="text-xs sm:text-sm">{t.feelsLike} {Math.round(weatherData?.main?.feels_like)}°</p>
                     </div>
                   </div>
                 </div>
@@ -389,17 +410,17 @@ export default function FarmerPageContent() {
               >
                 <div className="p-2 text-center sm:p-3">
                   <Droplets className="mx-auto mb-2 h-5 w-5 text-white sm:h-6 sm:w-6" />
-                  <p className="mb-1 text-[10px] font-medium text-white/80 sm:text-xs md:text-sm">Humidity</p>
+                  <p className="mb-1 text-[10px] font-medium text-white/80 sm:text-xs md:text-sm">{t.humidity}</p>
                   <p className="text-lg font-bold text-white sm:text-xl md:text-2xl">{weatherData?.main?.humidity}%</p>
                 </div>
                 <div className="p-2 text-center sm:p-3">
                   <Wind className="mx-auto mb-2 h-5 w-5 text-white sm:h-6 sm:w-6" />
-                  <p className="mb-1 text-[10px] font-medium text-white/80 sm:text-xs md:text-sm">Wind</p>
+                  <p className="mb-1 text-[10px] font-medium text-white/80 sm:text-xs md:text-sm">{t.wind}</p>
                   <p className="text-lg font-bold text-white sm:text-xl md:text-2xl">{weatherData?.wind?.speed} m/s</p>
                 </div>
                 <div className="p-2 text-center sm:p-3">
                   <Cloud className="mx-auto mb-2 h-5 w-5 text-white sm:h-6 sm:w-6" />
-                  <p className="mb-1 text-[10px] font-medium text-white/80 sm:text-xs md:text-sm">Clouds</p>
+                  <p className="mb-1 text-[10px] font-medium text-white/80 sm:text-xs md:text-sm">{t.clouds}</p>
                   <p className="text-lg font-bold text-white sm:text-xl md:text-2xl">{weatherData?.clouds?.all}%</p>
                 </div>
               </motion.div>
@@ -418,7 +439,7 @@ export default function FarmerPageContent() {
               transition={{ delay: 0.2 }}
               className="text-2xl font-semibold text-gray-900 sm:text-3xl md:text-4xl"
             >
-              Recommended Crops
+              {t.recommendedCrops}
             </motion.h2>
 
             <motion.button
@@ -434,10 +455,10 @@ export default function FarmerPageContent() {
               {cropMutation.isPending ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
-                  Processing...
+                  {t.processing}
                 </span>
               ) : (
-                'Get Crop Suggestions'
+                t.getCropSuggestions
               )}
             </motion.button>
           </div>
@@ -452,7 +473,7 @@ export default function FarmerPageContent() {
             <div className="text-center">
               <Sprout className="mx-auto mb-3 h-12 w-12 text-gray-400 sm:mb-4 sm:h-16 sm:w-16" />
               <p className="text-sm text-gray-600 sm:text-base md:text-lg">
-                Provide details for crop suggestions to see recommendations
+                {t.provideDetails}
               </p>
             </div>
           </motion.div>
@@ -479,10 +500,10 @@ export default function FarmerPageContent() {
                   <div className="p-4 sm:p-5 md:p-6">
                     <h3 className="mb-2 text-lg font-semibold text-gray-900 sm:text-xl">{crop.name}</h3>
                     <div className="space-y-1 text-xs text-gray-600 sm:text-sm">
-                      <p><span className="font-medium">Status:</span> {crop.season}</p>
-                      <p><span className="font-medium">Note:</span> {crop.yield}</p>
+                      <p><span className="font-medium">{t.status}:</span> {crop.season}</p>
+                      <p><span className="font-medium">{t.note}:</span> {crop.yield}</p>
                     </div>
-                    <p className="mt-2 text-[10px] font-medium text-emerald-600 sm:mt-3 sm:text-xs">Click for detailed analysis →</p>
+                    <p className="mt-2 text-[10px] font-medium text-emerald-600 sm:mt-3 sm:text-xs">{t.clickForDetails}</p>
                   </div>
                 </motion.div>
               ))}
@@ -504,11 +525,11 @@ export default function FarmerPageContent() {
                 {cropMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin sm:h-5 sm:w-5" />
-                    Loading More...
+                    {t.loadingMore}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    Show More Recommendations
+                    {t.showMore}
                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs sm:text-sm">+5</span>
                   </span>
                 )}

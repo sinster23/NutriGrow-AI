@@ -1,20 +1,99 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sprout, Apple, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+
+// Translations
+const translations = {
+  en: {
+    title: 'Choose How You Want to Use NutriGrow',
+    subtitle: 'NutriGrow AI provides tailored recommendations based on your role.',
+    farmerTitle: 'For Farmers',
+    farmerDescription: 'Get crop recommendations based on soil, climate, and nutrient availability to improve yield and sustainability.',
+    farmerButton: 'Get Crop Recommendations',
+    consumerTitle: 'For Consumers',
+    consumerDescription: 'Receive personalized nutrition guidance based on age, health conditions, and dietary preferences.',
+    consumerButton: 'Get Nutrition Plan'
+  },
+  hi: {
+    title: 'चुनें कि आप NutriGrow का उपयोग कैसे करना चाहते हैं',
+    subtitle: 'NutriGrow AI आपकी भूमिका के आधार पर अनुकूलित सिफारिशें प्रदान करता है।',
+    farmerTitle: 'किसानों के लिए',
+    farmerDescription: 'उपज और स्थिरता में सुधार के लिए मिट्टी, जलवायु और पोषक तत्वों की उपलब्धता के आधार पर फसल की सिफारिशें प्राप्त करें।',
+    farmerButton: 'फसल सिफारिशें प्राप्त करें',
+    consumerTitle: 'उपभोक्ताओं के लिए',
+    consumerDescription: 'उम्र, स्वास्थ्य स्थितियों और आहार प्राथमिकताओं के आधार पर व्यक्तिगत पोषण मार्गदर्शन प्राप्त करें।',
+    consumerButton: 'पोषण योजना प्राप्त करें'
+  },
+  pa: {
+    title: 'ਚੁਣੋ ਕਿ ਤੁਸੀਂ NutriGrow ਦੀ ਵਰਤੋਂ ਕਿਵੇਂ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ',
+    subtitle: 'NutriGrow AI ਤੁਹਾਡੀ ਭੂਮਿਕਾ ਦੇ ਆਧਾਰ ਤੇ ਅਨੁਕੂਲਿਤ ਸਿਫਾਰਸ਼ਾਂ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ।',
+    farmerTitle: 'ਕਿਸਾਨਾਂ ਲਈ',
+    farmerDescription: 'ਉਪਜ ਅਤੇ ਸਥਿਰਤਾ ਵਿੱਚ ਸੁਧਾਰ ਕਰਨ ਲਈ ਮਿੱਟੀ, ਜਲਵਾਯੂ ਅਤੇ ਪੌਸ਼ਟਿਕ ਤੱਤ ਉਪਲਬਧਤਾ ਦੇ ਆਧਾਰ ਤੇ ਫਸਲ ਸਿਫਾਰਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ।',
+    farmerButton: 'ਫਸਲ ਸਿਫਾਰਸ਼ਾਂ ਪ੍ਰਾਪਤ ਕਰੋ',
+    consumerTitle: 'ਖਪਤਕਾਰਾਂ ਲਈ',
+    consumerDescription: 'ਉਮਰ, ਸਿਹਤ ਸਥਿਤੀਆਂ ਅਤੇ ਖੁਰਾਕ ਤਰਜੀਹਾਂ ਦੇ ਆਧਾਰ ਤੇ ਵਿਅਕਤੀਗਤ ਪੋਸ਼ਣ ਮਾਰਗਦਰਸ਼ਨ ਪ੍ਰਾਪਤ ਕਰੋ।',
+    consumerButton: 'ਪੋਸ਼ਣ ਯੋਜਨਾ ਪ੍ਰਾਪਤ ਕਰੋ'
+  },
+  mr: {
+    title: 'तुम्हाला NutriGrow कसा वापरायचा आहे ते निवडा',
+    subtitle: 'NutriGrow AI तुमच्या भूमिकेवर आधारित अनुकूलित शिफारसी प्रदान करते.',
+    farmerTitle: 'शेतकऱ्यांसाठी',
+    farmerDescription: 'उत्पादन आणि टिकाऊपणा सुधारण्यासाठी माती, हवामान आणि पोषक घटकांच्या उपलब्धतेवर आधारित पीक शिफारसी मिळवा.',
+    farmerButton: 'पीक शिफारसी मिळवा',
+    consumerTitle: 'ग्राहकांसाठी',
+    consumerDescription: 'वय, आरोग्य स्थिती आणि आहार प्राधान्यांवर आधारित वैयक्तिक पोषण मार्गदर्शन प्राप्त करा.',
+    consumerButton: 'पोषण योजना मिळवा'
+  },
+  bn: {
+    title: 'আপনি কীভাবে NutriGrow ব্যবহার করতে চান তা চয়ন করুন',
+    subtitle: 'NutriGrow AI আপনার ভূমিকার উপর ভিত্তি করে উপযোগী সুপারিশ প্রদান করে।',
+    farmerTitle: 'কৃষকদের জন্য',
+    farmerDescription: 'ফলন এবং স্থায়িত্ব উন্নত করতে মাটি, জলবায়ু এবং পুষ্টির উপাদান প্রাপ্যতার উপর ভিত্তি করে ফসলের সুপারিশ পান।',
+    farmerButton: 'ফসলের সুপারিশ পান',
+    consumerTitle: 'ভোক্তাদের জন্য',
+    consumerDescription: 'বয়স, স্বাস্থ্যের অবস্থা এবং খাদ্যতালিকাগত পছন্দের উপর ভিত্তি করে ব্যক্তিগত পুষ্টি নির্দেশনা পান।',
+    consumerButton: 'পুষ্টি পরিকল্পনা পান'
+  }
+};
+
+// Custom hook for translation
+const useTranslation = () => {
+  const [currentLang, setCurrentLang] = useState('en');
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('preferred-language') || 'en';
+    setCurrentLang(savedLang);
+
+    const handleLanguageChange = (event) => {
+      setCurrentLang(event.detail);
+    };
+
+    window.addEventListener('languageChange', handleLanguageChange);
+    return () => window.removeEventListener('languageChange', handleLanguageChange);
+  }, []);
+
+  return translations[currentLang];
+};
 
 export default function ChooseRolePage() {
-  React.useEffect(() => {
-    // Load Google Font
+  const t = useTranslation();
+
+  useEffect(() => {
     const link = document.createElement('link');
     link.href = 'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
   }, []);
 
-  const router = useRouter();
+  const handleFarmerClick = () => {
+    window.location.href = '/farmer';
+  };
+
+  const handleConsumerClick = () => {
+    window.location.href = '/consumer';
+  };
 
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden">
@@ -27,7 +106,7 @@ export default function ChooseRolePage() {
           className="mb-3 text-3xl font-medium text-white drop-shadow-2xl sm:mb-4 sm:text-4xl md:text-5xl lg:text-6xl"
           style={{ fontFamily: "'Work Sans', sans-serif", fontWeight: 500 }}
         >
-          Choose How You Want to Use NutriGrow
+          {t.title}
         </motion.h1>
         <motion.p
           initial={{ y: -20, opacity: 0 }}
@@ -36,7 +115,7 @@ export default function ChooseRolePage() {
           className="text-sm text-white/80 drop-shadow-lg sm:text-base md:text-lg lg:text-xl"
           style={{ fontFamily: "'Work Sans', sans-serif" }}
         >
-          NutriGrow AI provides tailored recommendations based on your role.
+          {t.subtitle}
         </motion.p>
       </div>
 
@@ -77,7 +156,7 @@ export default function ChooseRolePage() {
               className="mb-4 text-3xl font-medium text-white sm:text-4xl lg:text-5xl"
               style={{ fontFamily: "'Work Sans', sans-serif", fontWeight: 500 }}
             >
-              For Farmers
+              {t.farmerTitle}
             </motion.h2>
 
             <motion.p
@@ -87,7 +166,7 @@ export default function ChooseRolePage() {
               className="mb-8 max-w-md text-sm leading-relaxed text-gray-100 sm:text-base lg:text-lg"
               style={{ fontFamily: "'Work Sans', sans-serif" }}
             >
-              Get crop recommendations based on soil, climate, and nutrient availability to improve yield and sustainability.
+              {t.farmerDescription}
             </motion.p>
 
             <motion.button
@@ -99,11 +178,11 @@ export default function ChooseRolePage() {
                 boxShadow: '0 20px 40px rgba(255, 255, 255, 0.3)',
               }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/farmer')}
+              onClick={handleFarmerClick}
               className="group flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-emerald-800 shadow-xl transition-all sm:px-8 sm:py-4 sm:text-base lg:text-lg"
               style={{ fontFamily: "'Work Sans', sans-serif" }}
             >
-              Get Crop Recommendations
+              {t.farmerButton}
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 sm:h-5 sm:w-5" />
             </motion.button>
           </div>
@@ -144,7 +223,7 @@ export default function ChooseRolePage() {
               className="mb-4 text-3xl font-medium text-white sm:text-4xl lg:text-5xl"
               style={{ fontFamily: "'Work Sans', sans-serif", fontWeight: 500 }}
             >
-              For Consumers
+              {t.consumerTitle}
             </motion.h2>
 
             <motion.p
@@ -154,11 +233,11 @@ export default function ChooseRolePage() {
               className="mb-8 max-w-md text-sm leading-relaxed text-gray-100 sm:text-base lg:text-lg"
               style={{ fontFamily: "'Work Sans', sans-serif" }}
             >
-              Receive personalized nutrition guidance based on age, health conditions, and dietary preferences.
+              {t.consumerDescription}
             </motion.p>
 
             <motion.button
-              onClick={() => router.push('/consumer')}
+              onClick={handleConsumerClick}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.6 }}
@@ -170,7 +249,7 @@ export default function ChooseRolePage() {
               className="group flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-teal-800 shadow-xl transition-all sm:px-8 sm:py-4 sm:text-base lg:text-lg"
               style={{ fontFamily: "'Work Sans', sans-serif" }}
             >
-              Get Nutrition Plan
+              {t.consumerButton}
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 sm:h-5 sm:w-5" />
             </motion.button>
           </div>

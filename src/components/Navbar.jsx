@@ -2,14 +2,73 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sprout } from 'lucide-react';
+import { Menu, X, Sprout, Globe, ChevronDown } from 'lucide-react';
+
+// Language configurations
+const languages = [
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
+  { code: 'pa', name: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+  { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
+  { code: 'bn', name: 'বাংলা', flag: '🇮🇳' },
+];
+
+// Translation object
+const translations = {
+  en: {
+    home: 'Home',
+    about: 'About',
+    services: 'Services',
+    project: 'Project',
+    blog: 'Blog',
+    contact: 'Contact Us',
+    language: 'Language'
+  },
+  hi: {
+    home: 'होम',
+    about: 'हमारे बारे में',
+    services: 'सेवाएं',
+    project: 'परियोजना',
+    blog: 'ब्लॉग',
+    contact: 'संपर्क करें',
+    language: 'भाषा'
+  },
+  pa: {
+    home: 'ਘਰ',
+    about: 'ਸਾਡੇ ਬਾਰੇ',
+    services: 'ਸੇਵਾਵਾਂ',
+    project: 'ਪ੍ਰੋਜੈਕਟ',
+    blog: 'ਬਲੌਗ',
+    contact: 'ਸੰਪਰਕ ਕਰੋ',
+    language: 'ਭਾਸ਼ਾ'
+  },
+  mr: {
+    home: 'मुख्यपृष्ठ',
+    about: 'आमच्याबद्दल',
+    services: 'सेवा',
+    project: 'प्रकल्प',
+    blog: 'ब्लॉग',
+    contact: 'संपर्क साधा',
+    language: 'भाषा'
+  },
+  bn: {
+    home: 'হোম',
+    about: 'আমাদের সম্পর্কে',
+    services: 'সেবা',
+    project: 'প্রকল্প',
+    blog: 'ব্লগ',
+    contact: 'যোগাযোগ করুন',
+    language: 'ভাষা'
+  }
+};
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en');
 
   useEffect(() => {
-    // Load Google Font
     const link = document.createElement('link');
     link.href = 'https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap';
     link.rel = 'stylesheet';
@@ -19,16 +78,32 @@ export default function Navbar() {
       setIsScrolled(window.scrollY > 20);
     };
 
+    // Load saved language preference
+    const savedLang = localStorage.getItem('preferred-language') || 'en';
+    setCurrentLang(savedLang);
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLanguageChange = (langCode) => {
+    setCurrentLang(langCode);
+    localStorage.setItem('preferred-language', langCode);
+    setIsLangDropdownOpen(false);
+    
+    // Dispatch custom event for other components to listen
+    window.dispatchEvent(new CustomEvent('languageChange', { detail: langCode }));
+  };
+
+  const t = translations[currentLang];
+  const currentLanguage = languages.find(lang => lang.code === currentLang);
+
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Services', href: '#services' },
-    { name: 'Project', href: '#project' },
-    { name: 'Blog', href: '#blog' },
+    { name: t.home, href: '#home' },
+    { name: t.about, href: '#about' },
+    { name: t.services, href: '#services' },
+    { name: t.project, href: '#project' },
+    { name: t.blog, href: '#blog' },
   ];
 
   return (
@@ -89,8 +164,60 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Contact Button */}
+          {/* Right Side Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Language Selector - Desktop */}
+            <div className="hidden sm:block relative">
+              <motion.button
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 lg:px-4 lg:py-2 lg:text-sm"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Globe className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
+                <span className="hidden lg:inline">{currentLanguage?.flag}</span>
+                <span className="hidden xl:inline">{currentLanguage?.name}</span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
+              </motion.button>
+
+              {/* Language Dropdown */}
+              <AnimatePresence>
+                {isLangDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"
+                  >
+                    {languages.map((lang) => (
+                      <motion.button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors ${
+                          currentLang === lang.code
+                            ? 'bg-emerald-50 text-emerald-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                        whileHover={{ x: 4 }}
+                      >
+                        <span className="text-xl">{lang.flag}</span>
+                        <span>{lang.name}</span>
+                        {currentLang === lang.code && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="ml-auto h-2 w-2 rounded-full bg-emerald-500"
+                          />
+                        )}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Contact Button */}
             <motion.a
               href="#contact"
               className="hidden items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-emerald-600/30 sm:flex sm:px-4 sm:py-2 sm:text-sm lg:gap-2 lg:px-5 lg:py-2.5"
@@ -102,7 +229,7 @@ export default function Navbar() {
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
-              Contact Us
+              {t.contact}
               <motion.svg
                 className="h-3 w-3 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4"
                 fill="none"
@@ -167,6 +294,28 @@ export default function Navbar() {
               className="mt-2 overflow-hidden rounded-3xl border border-white/20 bg-white/95 shadow-xl backdrop-blur-md md:hidden"
             >
               <div className="flex flex-col gap-1 p-3 sm:gap-1.5 sm:p-4">
+                {/* Mobile Language Selector */}
+                <div className="mb-2 border-b pb-3">
+                  <p className="mb-2 px-3 text-xs font-medium text-gray-500">{t.language}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {languages.map((lang) => (
+                      <motion.button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                          currentLang === lang.code
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-gray-50 text-gray-700'
+                        }`}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
                 {navLinks.map((link, index) => (
                   <motion.a
                     key={link.name}
@@ -199,7 +348,7 @@ export default function Navbar() {
                   }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Contact Us
+                  {t.contact}
                   <motion.svg
                     className="h-3 w-3 sm:h-3.5 sm:w-3.5"
                     fill="none"

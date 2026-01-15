@@ -38,3 +38,15 @@ export const useNutritionPlan = () => {
     },
   });
 };
+
+export const useFoodDetails = () => {
+  return useMutation({
+    mutationFn: cropApi.getFoodDetails,
+    onSuccess: (data) => {
+      console.log('Food details received:', data);
+    },
+    onError: (error) => {
+      console.error('Error getting food details:', error);
+    },
+  });
+};

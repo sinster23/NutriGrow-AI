@@ -1,10 +1,30 @@
-// src/components/CropDetailsModal.jsx
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { cropDetailsModalTranslations } from '@/lib/translations/modelTranslations';
+
+// Custom hook for translation
+const useTranslation = () => {
+  const [currentLang, setCurrentLang] = useState('en');
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('preferred-language') || 'en';
+    setCurrentLang(savedLang);
+
+    const handleLanguageChange = (event) => {
+      setCurrentLang(event.detail);
+    };
+
+    window.addEventListener('languageChange', handleLanguageChange);
+    return () => window.removeEventListener('languageChange', handleLanguageChange);
+  }, []);
+
+  return cropDetailsModalTranslations[currentLang];
+};
 
 export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoading }) {
+  const t = useTranslation();
+
   if (!isOpen) return null;
 
   const getStatusColor = (status) => {
@@ -33,6 +53,16 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
     }
   };
 
+  const translateSuitability = (suitability) => {
+    const suitabilityMap = {
+      'Excellent': t.excellent,
+      'Good': t.good,
+      'Fair': t.fair,
+      'Poor': t.poor
+    };
+    return suitabilityMap[suitability] || suitability;
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -55,11 +85,11 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
               <div className="flex items-center gap-3">
                 <h3 className="text-2xl font-semibold text-gray-900">
-                  {isLoading ? 'Loading...' : cropDetails?.crop_name || 'Crop Details'}
+                  {isLoading ? t.loading : cropDetails?.crop_name || t.cropDetails}
                 </h3>
                 {!isLoading && cropDetails && (
                   <span className={`px-3 py-1 text-sm font-medium rounded-full border ${getSuitabilityColor(cropDetails.suitability)}`}>
-                    {cropDetails.suitability}
+                    {translateSuitability(cropDetails.suitability)}
                   </span>
                 )}
               </div>
@@ -75,7 +105,7 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-12 w-12 animate-spin text-emerald-600 mb-4" />
-                  <p className="text-gray-600">Loading crop details...</p>
+                  <p className="text-gray-600">{t.loadingDetails}</p>
                 </div>
               ) : cropDetails?.error ? (
                 <div className="flex flex-col items-center justify-center py-12">
@@ -88,7 +118,7 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
                   <div className="bg-gradient-to-br from-emerald-50 to-blue-50 rounded-2xl p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2">Overall Suitability Score</h4>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2">{t.overallScore}</h4>
                         <div className="flex items-center gap-3">
                           <span className="text-4xl font-bold text-emerald-600">{cropDetails.overall_score}%</span>
                           <TrendingUp className="h-8 w-8 text-emerald-600" />
@@ -99,50 +129,50 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
 
                   {/* Climate Match */}
                   <div>
-                    <h4 className="text-xl font-semibold text-gray-900 mb-4">Climate Conditions</h4>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-4">{t.climateConditions}</h4>
                     <div className="grid gap-4 sm:grid-cols-3">
                       <div className="bg-white border rounded-xl p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">Temperature</span>
+                          <span className="text-sm font-medium text-gray-600">{t.temperature}</span>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(cropDetails.climate_match.temperature.status)}`}>
                             {cropDetails.climate_match.temperature.match_percentage}%
                           </span>
                         </div>
                         <div className="text-2xl font-bold text-gray-900">{cropDetails.climate_match.temperature.your_value}°C</div>
-                        <div className="text-sm text-gray-500 mt-1">Ideal: {cropDetails.climate_match.temperature.ideal_value}°C</div>
+                        <div className="text-sm text-gray-500 mt-1">{t.ideal}: {cropDetails.climate_match.temperature.ideal_value}°C</div>
                       </div>
 
                       <div className="bg-white border rounded-xl p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">Humidity</span>
+                          <span className="text-sm font-medium text-gray-600">{t.humidity}</span>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(cropDetails.climate_match.humidity.status)}`}>
                             {cropDetails.climate_match.humidity.match_percentage}%
                           </span>
                         </div>
                         <div className="text-2xl font-bold text-gray-900">{cropDetails.climate_match.humidity.your_value}%</div>
-                        <div className="text-sm text-gray-500 mt-1">Ideal: {cropDetails.climate_match.humidity.ideal_value}%</div>
+                        <div className="text-sm text-gray-500 mt-1">{t.ideal}: {cropDetails.climate_match.humidity.ideal_value}%</div>
                       </div>
 
                       <div className="bg-white border rounded-xl p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-600">Moisture</span>
+                          <span className="text-sm font-medium text-gray-600">{t.moisture}</span>
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(cropDetails.climate_match.moisture.status)}`}>
                             {cropDetails.climate_match.moisture.match_percentage}%
                           </span>
                         </div>
                         <div className="text-2xl font-bold text-gray-900">{cropDetails.climate_match.moisture.your_value}%</div>
-                        <div className="text-sm text-gray-500 mt-1">Ideal: {cropDetails.climate_match.moisture.ideal_value}%</div>
+                        <div className="text-sm text-gray-500 mt-1">{t.ideal}: {cropDetails.climate_match.moisture.ideal_value}%</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Soil Match */}
                   <div>
-                    <h4 className="text-xl font-semibold text-gray-900 mb-4">Soil Compatibility</h4>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-4">{t.soilCompatibility}</h4>
                     <div className="bg-white border rounded-xl p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-medium text-gray-600 mb-1">Your Soil Type</div>
+                          <div className="text-sm font-medium text-gray-600 mb-1">{t.yourSoilType}</div>
                           <div className="text-lg font-semibold text-gray-900">{cropDetails.soil_match.your_soil}</div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -152,13 +182,13 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
                             <AlertCircle className="h-6 w-6 text-yellow-500" />
                           )}
                           <span className={`px-3 py-1 text-sm font-medium rounded-full ${cropDetails.soil_match.is_perfect_match ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                            {cropDetails.soil_match.compatibility}
+                            {cropDetails.soil_match.is_perfect_match ? t.perfectMatch : t.compatible}
                           </span>
                         </div>
                       </div>
                       {!cropDetails.soil_match.is_perfect_match && (
                         <div className="mt-3 text-sm text-gray-600">
-                          Ideal soil type: <span className="font-medium">{cropDetails.soil_match.ideal_soil}</span>
+                          {t.idealSoilType}: <span className="font-medium">{cropDetails.soil_match.ideal_soil}</span>
                         </div>
                       )}
                     </div>
@@ -166,29 +196,29 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
 
                   {/* Nutrient Match */}
                   <div>
-                    <h4 className="text-xl font-semibold text-gray-900 mb-4">Nutrient Levels (NPK)</h4>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-4">{t.nutrientLevels}</h4>
                     <div className="bg-white border rounded-xl p-4">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-medium text-gray-600">Match Quality</span>
+                        <span className="text-sm font-medium text-gray-600">{t.matchQuality}</span>
                         <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(cropDetails.nutrient_match.status)}`}>
                           {cropDetails.nutrient_match.match_percentage}%
                         </span>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <div className="text-xs text-gray-500 mb-1">Nitrogen (N)</div>
+                          <div className="text-xs text-gray-500 mb-1">{t.nitrogen}</div>
                           <div className="text-lg font-semibold text-gray-900">{cropDetails.nutrient_match.your_npk.N}</div>
-                          <div className="text-xs text-gray-500">Ideal: {cropDetails.nutrient_match.ideal_npk.N}</div>
+                          <div className="text-xs text-gray-500">{t.ideal}: {cropDetails.nutrient_match.ideal_npk.N}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500 mb-1">Phosphorous (P)</div>
+                          <div className="text-xs text-gray-500 mb-1">{t.phosphorous}</div>
                           <div className="text-lg font-semibold text-gray-900">{cropDetails.nutrient_match.your_npk.P}</div>
-                          <div className="text-xs text-gray-500">Ideal: {cropDetails.nutrient_match.ideal_npk.P}</div>
+                          <div className="text-xs text-gray-500">{t.ideal}: {cropDetails.nutrient_match.ideal_npk.P}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500 mb-1">Potassium (K)</div>
+                          <div className="text-xs text-gray-500 mb-1">{t.potassium}</div>
                           <div className="text-lg font-semibold text-gray-900">{cropDetails.nutrient_match.your_npk.K}</div>
-                          <div className="text-xs text-gray-500">Ideal: {cropDetails.nutrient_match.ideal_npk.K}</div>
+                          <div className="text-xs text-gray-500">{t.ideal}: {cropDetails.nutrient_match.ideal_npk.K}</div>
                         </div>
                       </div>
                     </div>
@@ -196,7 +226,7 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
 
                   {/* Explanations */}
                   <div>
-                    <h4 className="text-xl font-semibold text-gray-900 mb-4">Detailed Analysis</h4>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-4">{t.detailedAnalysis}</h4>
                     <div className="space-y-2">
                       {cropDetails.explanations.map((explanation, index) => (
                         <div key={index} className="flex items-start gap-3 bg-gray-50 rounded-lg p-3">
@@ -209,7 +239,7 @@ export default function CropDetailsModal({ isOpen, onClose, cropDetails, isLoadi
 
                   {/* Recommendations */}
                   <div>
-                    <h4 className="text-xl font-semibold text-gray-900 mb-4">Growing Recommendations</h4>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-4">{t.growingRecommendations}</h4>
                     <div className="grid gap-3 sm:grid-cols-2">
                       {cropDetails.recommendations.map((rec, index) => (
                         <div key={index} className="flex items-start gap-3 bg-blue-50 rounded-lg p-3">
