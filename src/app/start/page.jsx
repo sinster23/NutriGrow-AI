@@ -158,6 +158,7 @@ export default function ChooseRolePage() {
             </motion.p>
 
             <motion.button
+              onClick={() => router.push('/consumer')}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.9, duration: 0.6 }}
