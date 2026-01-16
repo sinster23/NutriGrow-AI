@@ -120,4 +120,23 @@ export const cropApi = {
 
     return response.json();
   },
+
+   getRegionalAdvisory: async (region) => {
+    const response = await fetch(`${API_BASE_URL}/region-nutrition-advisory`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        region: region,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Failed to get regional advisory');
+    }
+
+    return response.json();
+  },
 };

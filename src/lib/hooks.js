@@ -50,3 +50,15 @@ export const useFoodDetails = () => {
     },
   });
 };
+
+export const useRegionalAdvisory = () => {
+  return useMutation({
+    mutationFn: cropApi.getRegionalAdvisory,
+    onSuccess: (data) => {
+      console.log('Regional advisory received:', data);
+    },
+    onError: (error) => {
+      console.error('Error getting regional advisory:', error);
+    },
+  });
+};

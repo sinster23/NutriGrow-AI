@@ -7,6 +7,9 @@ import { useCropRecommendation, useCropDetails } from '@/lib/hooks';
 import CropInputModal from '@/components/CropInputModal';
 import CropDetailsModal from '@/components/CropDetailsModal';
 import { farmerTranslations } from '@/lib/translations/farmerTranslations';
+import { useRegionalAdvisory } from '@/lib/hooks';
+import RegionalAdvisoryBanner from '@/components/RegionalAdvisoryBanner';
+import { getStateFromCity } from '@/utils/locationUtils';
 
 // Custom hook for translation
 const useTranslation = () => {
@@ -77,9 +80,12 @@ export default function FarmerPageContent() {
     phosphorous: '',
     potassium: '',
   });
+  const [regionalAdvisory, setRegionalAdvisory] = useState(null);
+  const [showAdvisory, setShowAdvisory] = useState(true);
 
   const cropMutation = useCropRecommendation();
   const cropDetailsMutation = useCropDetails();
+  const regionalAdvisoryMutation = useRegionalAdvisory();
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -112,42 +118,58 @@ export default function FarmerPageContent() {
     );
   };
 
-  const fetchWeatherData = async (lat, lon) => {
-    try {
-      setLoading(true);
-      
-      const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
-      
-      if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-        console.warn('OpenWeatherMap API key not set. Using fallback data.');
-        useFallbackData(lat, lon);
-        return;
-      }
-      
-      const weatherResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
-      );
-      
-      const forecastResponse = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
-      );
+ const fetchWeatherData = async (lat, lon) => {
+   try {
+     setLoading(true);
 
-      if (weatherResponse.ok && forecastResponse.ok) {
-        const weather = await weatherResponse.json();
-        const forecast = await forecastResponse.json();
-        
-        setWeatherData(weather);
-        setForecastData(forecast);
-      } else {
-        useFallbackData(lat, lon);
-      }
-    } catch (error) {
-      console.error('Error fetching weather:', error);
-      useFallbackData(lat, lon);
-    } finally {
-      setLoading(false);
-    }
-  };
+     const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY;
+
+     if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
+       console.warn("OpenWeatherMap API key not set. Using fallback data.");
+       useFallbackData(lat, lon);
+       return;
+     }
+
+     const weatherResponse = await fetch(
+       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+     );
+
+     const forecastResponse = await fetch(
+       `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
+     );
+
+     if (weatherResponse.ok && forecastResponse.ok) {
+       const weather = await weatherResponse.json();
+       const forecast = await forecastResponse.json();
+
+       setWeatherData(weather);
+       setForecastData(forecast);
+
+       // NEW: Fetch regional advisory based on location name
+       if (weather.name) {
+         fetchRegionalAdvisory(weather.name);
+       }
+     } else {
+       useFallbackData(lat, lon);
+     }
+   } catch (error) {
+     console.error("Error fetching weather:", error);
+     useFallbackData(lat, lon);
+   } finally {
+     setLoading(false);
+   }
+ };
+
+ const fetchRegionalAdvisory = async (locationName) => {
+   try {
+     // Convert city to state for better matching
+     const region = getStateFromCity(locationName);
+     const result = await regionalAdvisoryMutation.mutateAsync(region);
+     setRegionalAdvisory(result);
+   } catch (error) {
+     console.error("Error fetching regional advisory:", error);
+   }
+ };
 
   const useFallbackData = (lat, lon) => {
     const baseTemp = 28;
@@ -428,6 +450,15 @@ export default function FarmerPageContent() {
           )}
         </div>
       </motion.div>
+
+      {showAdvisory && regionalAdvisory && (
+        <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+          <RegionalAdvisoryBanner
+            advisory={regionalAdvisory}
+            onDismiss={() => setShowAdvisory(false)}
+          />
+        </div>
+      )}
 
       {/* Crops Section */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
