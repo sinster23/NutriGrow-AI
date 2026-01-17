@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, MapPin, Phone, Send, Loader2, CheckCircle2, Sprout, Users, Building2, MessageSquare } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Mail, MapPin, Phone, Send, Loader2, CheckCircle2, Sprout, Users, Building2, MessageSquare, UserCircle, Stethoscope, ChevronDown, ChevronUp } from 'lucide-react';
 import { contactTranslations } from '@/lib/translations/contactTranslations';
 import Navbar from '@/components/Navbar';
 
@@ -35,6 +35,168 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState('Odisha');
+  const [expandedProfessional, setExpandedProfessional] = useState(null);
+
+  // Professional contacts by location
+  const professionalsByLocation = {
+    'Odisha': [
+      {
+        name: 'Dr. Sarita Patel',
+        role: 'Nutritionist',
+        specialization: 'Clinical Nutrition & Diet Planning',
+        phone: '+91 98765 11111',
+        email: 'sarita.patel@nutricare.in',
+        location: 'Bhubaneswar',
+        experience: '12 years'
+      },
+      {
+        name: 'Dr. Rajesh Kumar',
+        role: 'Agricultural Expert',
+        specialization: 'Sustainable Farming & Soil Health',
+        phone: '+91 98765 22222',
+        email: 'rajesh.k@agrotech.in',
+        location: 'Cuttack',
+        experience: '15 years'
+      },
+      {
+        name: 'Ms. Priya Mohanty',
+        role: 'Nutritionist',
+        specialization: 'Maternal & Child Nutrition',
+        phone: '+91 98765 99999',
+        email: 'priya.m@healthfirst.in',
+        location: 'Puri',
+        experience: '8 years'
+      }
+    ],
+    'West Bengal': [
+      {
+        name: 'Dr. Ananya Mukherjee',
+        role: 'Nutritionist',
+        specialization: 'Child Nutrition & Women\'s Health',
+        phone: '+91 98765 33333',
+        email: 'ananya.m@healthplus.in',
+        location: 'Kolkata',
+        experience: '10 years'
+      },
+      {
+        name: 'Mr. Debashis Roy',
+        role: 'Agricultural Expert',
+        specialization: 'Organic Farming & Crop Management',
+        phone: '+91 98765 44444',
+        email: 'debashis.roy@farmtech.in',
+        location: 'Medinipur',
+        experience: '18 years'
+      },
+      {
+        name: 'Dr. Sutapa Das',
+        role: 'Nutritionist',
+        specialization: 'Diabetes & Lifestyle Management',
+        phone: '+91 98765 00001',
+        email: 'sutapa.das@wellness.in',
+        location: 'Durgapur',
+        experience: '14 years'
+      }
+    ],
+    'Maharashtra': [
+      {
+        name: 'Dr. Priya Sharma',
+        role: 'Nutritionist',
+        specialization: 'Sports Nutrition & Wellness',
+        phone: '+91 98765 55555',
+        email: 'priya.sharma@wellness.in',
+        location: 'Mumbai',
+        experience: '9 years'
+      },
+      {
+        name: 'Dr. Suresh Patil',
+        role: 'Agricultural Expert',
+        specialization: 'Precision Agriculture & Technology',
+        phone: '+91 98765 66666',
+        email: 'suresh.patil@agritech.in',
+        location: 'Pune',
+        experience: '20 years'
+      },
+      {
+        name: 'Ms. Kavita Deshmukh',
+        role: 'Nutritionist',
+        specialization: 'Weight Management & Fitness',
+        phone: '+91 98765 00002',
+        email: 'kavita.d@fitlife.in',
+        location: 'Nagpur',
+        experience: '7 years'
+      }
+    ],
+    'Punjab': [
+      {
+        name: 'Dr. Jaspreet Kaur',
+        role: 'Nutritionist',
+        specialization: 'Therapeutic Diets & Diabetes Management',
+        phone: '+91 98765 77777',
+        email: 'jaspreet.k@nutrihealth.in',
+        location: 'Ludhiana',
+        experience: '11 years'
+      },
+      {
+        name: 'Mr. Harpreet Singh',
+        role: 'Agricultural Expert',
+        specialization: 'Wheat & Rice Cultivation',
+        phone: '+91 98765 88888',
+        email: 'harpreet.s@farmexpert.in',
+        location: 'Amritsar',
+        experience: '16 years'
+      },
+      {
+        name: 'Dr. Simran Gill',
+        role: 'Nutritionist',
+        specialization: 'Pediatric & Adolescent Nutrition',
+        phone: '+91 98765 00003',
+        email: 'simran.gill@kidsnutri.in',
+        location: 'Jalandhar',
+        experience: '6 years'
+      }
+    ],
+    'Tamil Nadu': [
+      {
+        name: 'Dr. Lakshmi Iyer',
+        role: 'Nutritionist',
+        specialization: 'Traditional Nutrition & Ayurveda',
+        phone: '+91 98765 00004',
+        email: 'lakshmi.iyer@holistichealth.in',
+        location: 'Chennai',
+        experience: '13 years'
+      },
+      {
+        name: 'Mr. Ravi Kumar',
+        role: 'Agricultural Expert',
+        specialization: 'Organic Vegetables & Horticulture',
+        phone: '+91 98765 00005',
+        email: 'ravi.kumar@greenfarm.in',
+        location: 'Coimbatore',
+        experience: '19 years'
+      }
+    ],
+    'Karnataka': [
+      {
+        name: 'Dr. Meera Rao',
+        role: 'Nutritionist',
+        specialization: 'Corporate Wellness & Preventive Care',
+        phone: '+91 98765 00006',
+        email: 'meera.rao@wellnesshub.in',
+        location: 'Bangalore',
+        experience: '10 years'
+      },
+      {
+        name: 'Dr. Vishnu Sharma',
+        role: 'Agricultural Expert',
+        specialization: 'Coffee & Spice Cultivation',
+        phone: '+91 98765 00007',
+        email: 'vishnu.s@agriscience.in',
+        location: 'Mysore',
+        experience: '17 years'
+      }
+    ]
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -49,14 +211,10 @@ export default function ContactPage() {
     }
     
     setIsSubmitting(true);
-    
-    // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
     setIsSubmitting(false);
     setIsSubmitted(true);
     
-    // Reset form after 3 seconds
     setTimeout(() => {
       setFormData({ name: '', email: '', category: '', message: '' });
       setIsSubmitted(false);
@@ -67,10 +225,6 @@ export default function ContactPage() {
     if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
       e.preventDefault();
     }
-  };
-
-  const handleBack = () => {
-    window.history.back();
   };
 
   const categories = [
@@ -101,35 +255,43 @@ export default function ContactPage() {
     }
   ];
 
+  const locations = Object.keys(professionalsByLocation);
+
   return (
     <div 
       className="relative flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50"
       style={{ fontFamily: "'Work Sans', sans-serif" }}
     >
-        <Navbar />
+      <Navbar />
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8 mt-20">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-7xl space-y-8">
+          
+          {/* Page Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <h1 className="mb-3 text-4xl font-bold text-emerald-900 sm:text-5xl">
+              {t.pageTitle}
+            </h1>
+            <p className="text-lg text-emerald-700 max-w-3xl mx-auto">
+              {t.pageSubtitle}
+            </p>
+          </motion.div>
+
+          {/* Two Column Layout */}
           <div className="grid gap-8 lg:grid-cols-2">
             
-            {/* LEFT SIDE: Context / Information */}
+            {/* LEFT SIDE: Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               className="space-y-6"
             >
-              {/* Heading */}
-              <div>
-                <h2 className="mb-3 text-3xl font-semibold text-emerald-900 sm:text-4xl">
-                  {t.pageTitle}
-                </h2>
-                <p className="text-lg text-emerald-700">
-                  {t.pageSubtitle}
-                </p>
-              </div>
-
               {/* Description */}
               <div className="rounded-2xl border border-emerald-200 bg-white/60 p-6 backdrop-blur-sm">
                 <p className="leading-relaxed text-emerald-800">
@@ -138,7 +300,7 @@ export default function ContactPage() {
               </div>
 
               {/* Contact Information Cards */}
-              <div className="space-y-4">
+              <div className="space-y-4 mt-12">
                 <h3 className="text-lg font-medium text-emerald-900">{t.contactInfoTitle}</h3>
                 {contactInfo.map((info, index) => (
                   <motion.div
@@ -176,129 +338,132 @@ export default function ContactPage() {
               </div>
             </motion.div>
 
-            {/* RIGHT SIDE: Contact Form */}
+            {/* RIGHT SIDE: Professionals Directory */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="lg:sticky lg:top-8 lg:self-start"
+              className="space-y-6"
             >
-              <div className="rounded-2xl border border-emerald-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm sm:p-8">
-                <h3 className="mb-6 text-2xl font-semibold text-emerald-900">{t.formTitle}</h3>
-                
-                {isSubmitted ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-12 text-center"
-                  >
-                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600">
-                      <CheckCircle2 className="h-8 w-8 text-white" />
-                    </div>
-                    <h4 className="mb-2 text-xl font-semibold text-emerald-900">{t.successTitle}</h4>
-                    <p className="text-emerald-700">{t.successMessage}</p>
-                  </motion.div>
-                ) : (
-                  <div className="space-y-5">
-                    {/* Name Input */}
-                    <div>
-                      <label htmlFor="name" className="mb-2 block text-sm font-medium text-emerald-900">
-                        {t.nameLabel}
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        onKeyPress={handleKeyPress}
-                        className="w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-emerald-900 placeholder-emerald-400 transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                        placeholder={t.namePlaceholder}
-                      />
-                    </div>
+              <div className="rounded-2xl border border-emerald-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-semibold text-emerald-900 mb-2">
+                    Connect with Professionals
+                  </h3>
+                  <p className="text-emerald-700 text-sm">
+                    Find nutritionists and agricultural experts in your region
+                  </p>
+                </div>
 
-                    {/* Email Input */}
-                    <div>
-                      <label htmlFor="email" className="mb-2 block text-sm font-medium text-emerald-900">
-                        {t.emailLabel}
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        onKeyPress={handleKeyPress}
-                        className="w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-emerald-900 placeholder-emerald-400 transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                        placeholder={t.emailPlaceholder}
-                      />
-                    </div>
-
-                    {/* Category Selection */}
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-emerald-900">
-                        {t.categoryLabel}
-                      </label>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {categories.map((cat) => (
-                          <motion.div
-                            key={cat.value}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setFormData({ ...formData, category: cat.value })}
-                            className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all ${
-                              formData.category === cat.value
-                                ? 'border-emerald-500 bg-emerald-50'
-                                : 'border-emerald-200 bg-white hover:border-emerald-300'
-                            }`}
-                          >
-                            <cat.icon className={`h-5 w-5 ${formData.category === cat.value ? 'text-emerald-600' : 'text-emerald-400'}`} />
-                            <span className={`text-sm ${formData.category === cat.value ? 'font-medium text-emerald-900' : 'text-emerald-700'}`}>
-                              {cat.label}
-                            </span>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Message Textarea */}
-                    <div>
-                      <label htmlFor="message" className="mb-2 block text-sm font-medium text-emerald-900">
-                        {t.messageLabel}
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={5}
-                        className="w-full rounded-lg border border-emerald-200 bg-white px-4 py-3 text-emerald-900 placeholder-emerald-400 transition-all focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-                        placeholder={t.messagePlaceholder}
-                      />
-                    </div>
-
-                    {/* Submit Button */}
-                    <motion.button
-                      onClick={handleSubmit}
-                      disabled={isSubmitting || !formData.name || !formData.email || !formData.category || !formData.message}
-                      whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
-                      whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 px-6 py-3 font-medium text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          {t.sendingButton}
-                        </>
-                      ) : (
-                        <>
-                          <Send className="h-5 w-5" />
-                          {t.sendButton}
-                        </>
-                      )}
-                    </motion.button>
+                {/* Location Selector */}
+                <div className="mb-6">
+                  <label className="mb-3 block text-sm font-medium text-emerald-900">
+                    Select Your State
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {locations.map((location) => (
+                      <motion.button
+                        key={location}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedLocation(location)}
+                        className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                          selectedLocation === location
+                            ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md'
+                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                        }`}
+                      >
+                        {location}
+                      </motion.button>
+                    ))}
                   </div>
-                )}
+                </div>
+
+                {/* Professionals List */}
+                <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                  <AnimatePresence mode="wait">
+                    {professionalsByLocation[selectedLocation]?.map((prof, index) => (
+                      <motion.div
+                        key={`${selectedLocation}-${index}`}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${
+                            prof.role === 'Nutritionist' 
+                              ? 'bg-gradient-to-br from-pink-500 to-rose-600' 
+                              : 'bg-gradient-to-br from-green-500 to-emerald-600'
+                          }`}>
+                            {prof.role === 'Nutritionist' ? (
+                              <Stethoscope className="h-6 w-6 text-white" />
+                            ) : (
+                              <Sprout className="h-6 w-6 text-white" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-emerald-900">{prof.name}</h4>
+                            <p className="text-xs text-emerald-600 font-medium">{prof.role}</p>
+                            <p className="text-xs text-emerald-500 mt-1">{prof.specialization}</p>
+                            
+                            <button
+                              onClick={() => setExpandedProfessional(expandedProfessional === `${selectedLocation}-${index}` ? null : `${selectedLocation}-${index}`)}
+                              className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                            >
+                              {expandedProfessional === `${selectedLocation}-${index}` ? (
+                                <>
+                                  <ChevronUp className="h-3 w-3" />
+                                  Hide Details
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-3 w-3" />
+                                  Show Details
+                                </>
+                              )}
+                            </button>
+
+                            <AnimatePresence>
+                              {expandedProfessional === `${selectedLocation}-${index}` && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="mt-3 space-y-2 border-t border-emerald-100 pt-3"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-3 w-3 text-emerald-500" />
+                                    <span className="text-xs text-emerald-700">{prof.location}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <UserCircle className="h-3 w-3 text-emerald-500" />
+                                    <span className="text-xs text-emerald-700">Experience: {prof.experience}</span>
+                                  </div>
+                                  <a
+                                    href={`tel:${prof.phone}`}
+                                    className="flex items-center gap-2 text-xs text-emerald-600 hover:text-emerald-700"
+                                  >
+                                    <Phone className="h-3 w-3" />
+                                    {prof.phone}
+                                  </a>
+                                  <a
+                                    href={`mailto:${prof.email}`}
+                                    className="flex items-center gap-2 text-xs text-emerald-600 hover:text-emerald-700"
+                                  >
+                                    <Mail className="h-3 w-3" />
+                                    {prof.email}
+                                  </a>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
               </div>
             </motion.div>
           </div>
