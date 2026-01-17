@@ -242,7 +242,7 @@ export default function ServicesSection() {
             backgroundImage: 'url(service-bg1.jpeg)',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+             <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/50 to-black/60" />
       </div>
 
       {/* Background Decorations */}
@@ -381,7 +381,7 @@ export default function ServicesSection() {
             Ready to transform your farming and nutrition approach?
           </p>
           <motion.a
-            href="#contact"
+            href="/start"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 to-green-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/40"
