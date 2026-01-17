@@ -165,5 +165,38 @@ export const consumerTranslations = {
     noRecommendations: 'প্রদত্ত প্রোফাইলের জন্য কোনো খাদ্য সুপারিশ পাওয়া যায়নি।',
     provideHealthProfile: 'অনুগ্রহ করে প্রথমে "ব্যক্তিগত পরিকল্পনা পান" এ ক্লিক করে আপনার স্বাস্থ্য প্রোফাইল প্রদান করুন',
     error: 'ত্রুটি'
-  }
+  },
+  or: {
+  // Hero Section
+  healthCompanion: 'ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ସାଥୀ',
+  heroTitle: 'ବ୍ୟକ୍ତିଗତ ପୋଷଣ ସୁପାରିଶ',
+  heroSubtitle: 'ଆପଣଙ୍କ ବୟସ, ସ୍ୱାସ୍ଥ୍ୟ ଆବଶ୍ୟକତା ଏବଂ ଖାଦ୍ୟ ପସନ୍ଦ ଅନୁଯାୟୀ ଖାଦ୍ୟ ପରାମର୍ଶ ପାଆନ୍ତୁ।',
+  ageBased: 'ବୟସ-ଆଧାରିତ',
+  smartSelection: 'ସ୍ମାର୍ଟ ଚୟନ',
+  bmiOptimized: 'BMI-ଅନୁକୂଳିତ',
+  balancedDiet: 'ସନ୍ତୁଳିତ ଖାଦ୍ୟ',
+  healthFocused: 'ସ୍ୱାସ୍ଥ୍ୟ-କେନ୍ଦ୍ରିତ',
+  yourWellness: 'ଆପଣଙ୍କର ସୁସ୍ଥତା',
+  
+  // Foods Section
+  personalizedFoodPlan: 'ଆପଣଙ୍କର ବ୍ୟକ୍ତିଗତ ଖାଦ୍ୟ ଯୋଜନା',
+  getPersonalizedPlan: 'ବ୍ୟକ୍ତିଗତ ଯୋଜନା ପାଆନ୍ତୁ',
+  processing: 'ପ୍ରକ୍ରିୟାକରଣ...',
+  provideProfile: 'ବ୍ୟକ୍ତିଗତ ଖାଦ୍ୟ ସୁପାରିଶ ଦେଖିବାକୁ ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ପ୍ରୋଫାଇଲ୍ ସେୟାର କରନ୍ତୁ',
+  
+  // Food Card
+  status: 'ସ୍ଥିତି',
+  note: 'ଟିପ୍ପଣୀ',
+  clickForDetails: 'ପୋଷଣ ବିବରଣୀ ପାଇଁ କ୍ଲିକ୍ କରନ୍ତୁ →',
+  
+  // Show More
+  showMore: 'ଅଧିକ ସୁପାରିଶ ଦେଖାନ୍ତୁ',
+  loadingMore: 'ଅଧିକ ଲୋଡ୍ ହେଉଛି...',
+  
+  // Alerts
+  fillRequired: 'ଦୟାକରି ସମସ୍ତ ଆବଶ୍ୟକ କ୍ଷେତ୍ର ପୂରଣ କରନ୍ତୁ',
+  noRecommendations: 'ଦିଆଯାଇଥିବା ପ୍ରୋଫାଇଲ୍ ପାଇଁ କୌଣସି ଖାଦ୍ୟ ସୁପାରିଶ ମିଳିଲା ନାହିଁ।',
+  provideHealthProfile: 'ଦୟାକରି ପ୍ରଥମେ "ବ୍ୟକ୍ତିଗତ ଯୋଜନା ପାଆନ୍ତୁ" କ୍ଲିକ୍ କରି ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ପ୍ରୋଫାଇଲ୍ ପ୍ରଦାନ କରନ୍ତୁ',
+  error: 'ତ୍ରୁଟି'
+},
 };

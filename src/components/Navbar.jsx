@@ -8,6 +8,7 @@ import { Menu, X, Sprout, Globe, ChevronDown } from 'lucide-react';
 const languages = [
   { code: 'en', name: 'English', flag: '🇬🇧' },
   { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
+  { code: 'or', name: 'ଓଡ଼ିଆ', flag: '🇮🇳' },
   { code: 'pa', name: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
   { code: 'mr', name: 'मराठी', flag: '🇮🇳' },
   { code: 'bn', name: 'বাংলা', flag: '🇮🇳' },
@@ -17,49 +18,46 @@ const languages = [
 const translations = {
   en: {
     home: 'Home',
-    about: 'About',
     services: 'Services',
-    project: 'Project',
     blog: 'Blog',
     contact: 'Contact Us',
     language: 'Language'
   },
   hi: {
     home: 'होम',
-    about: 'हमारे बारे में',
     services: 'सेवाएं',
-    project: 'परियोजना',
     blog: 'ब्लॉग',
     contact: 'संपर्क करें',
     language: 'भाषा'
   },
   pa: {
     home: 'ਘਰ',
-    about: 'ਸਾਡੇ ਬਾਰੇ',
     services: 'ਸੇਵਾਵਾਂ',
-    project: 'ਪ੍ਰੋਜੈਕਟ',
     blog: 'ਬਲੌਗ',
     contact: 'ਸੰਪਰਕ ਕਰੋ',
     language: 'ਭਾਸ਼ਾ'
   },
   mr: {
     home: 'मुख्यपृष्ठ',
-    about: 'आमच्याबद्दल',
     services: 'सेवा',
-    project: 'प्रकल्प',
     blog: 'ब्लॉग',
     contact: 'संपर्क साधा',
     language: 'भाषा'
   },
   bn: {
     home: 'হোম',
-    about: 'আমাদের সম্পর্কে',
     services: 'সেবা',
-    project: 'প্রকল্প',
     blog: 'ব্লগ',
     contact: 'যোগাযোগ করুন',
     language: 'ভাষা'
-  }
+  },
+  or: {
+  home: 'ହୋମ୍',
+  services: 'ସେବାଗୁଡିକ',
+  blog: 'ବ୍ଲଗ୍',
+  contact: 'ଯୋଗାଯୋଗ କରନ୍ତୁ',
+  language: 'ଭାଷା'
+}
 };
 
 export default function Navbar() {
@@ -95,15 +93,32 @@ export default function Navbar() {
     window.dispatchEvent(new CustomEvent('languageChange', { detail: langCode }));
   };
 
+  const handleNavClick = (e, href) => {
+    // Only handle smooth scroll for #services, others will use normal navigation
+    if (href === '#services') {
+      e.preventDefault();
+      const element = document.getElementById('services');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setIsMobileMenuOpen(false);
+      }
+    } else if (href.startsWith('#')) {
+      // For other hash links on same page (home)
+      e.preventDefault();
+      setIsMobileMenuOpen(false);
+    }
+    // For non-hash links (about, project, blog), normal navigation will occur
+  };
+
   const t = translations[currentLang];
   const currentLanguage = languages.find(lang => lang.code === currentLang);
 
   const navLinks = [
     { name: t.home, href: '#home' },
-    { name: t.about, href: '#about' },
-    { name: t.services, href: '#services' },
-    { name: t.project, href: '#project' },
-    { name: t.blog, href: '#blog' },
+    { name: t.about, href: '/about' }, // Separate page
+    { name: t.services, href: '#services' }, // Scroll to section
+    { name: t.project, href: '/project' }, // Separate page
+    { name: t.blog, href: '/blog' }, // Separate page
   ];
 
   return (
@@ -148,6 +163,7 @@ export default function Navbar() {
               <motion.a
                 key={link.name}
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors lg:px-4 lg:py-2 lg:text-sm"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -320,7 +336,7 @@ export default function Navbar() {
                   <motion.a
                     key={link.name}
                     href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={(e) => handleNavClick(e, link.href)}
                     className="rounded-xl px-3 py-2 text-xs font-medium text-gray-700 transition-colors sm:px-4 sm:py-2.5 sm:text-sm"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
