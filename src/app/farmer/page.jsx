@@ -9,6 +9,7 @@ import CropDetailsModal from '@/components/CropDetailsModal';
 import { farmerTranslations } from '@/lib/translations/farmerTranslations';
 import { useRegionalAdvisory } from '@/lib/hooks';
 import RegionalAdvisoryBanner from '@/components/RegionalAdvisoryBanner';
+import CropDiversityScore from '@/components/CropDiversityScore';
 import { getStateFromCity } from '@/utils/locationUtils';
 
 // Custom hook for translation
@@ -71,6 +72,7 @@ export default function FarmerPageContent() {
   const [locationError, setLocationError] = useState(null);
   const [currentLimit, setCurrentLimit] = useState(4);
   const [cropImages, setCropImages] = useState({});
+  const [diversityScore, setDiversityScore] = useState(null);
   const [formData, setFormData] = useState({
     temperature: '',
     humidity: '',
@@ -227,36 +229,40 @@ export default function FarmerPageContent() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
-    if (!formData.temperature || !formData.humidity || !formData.soilMoisture || !formData.soilType) {
-      alert(t.fillRequired);
-      return;
-    }
+const handleSubmit = async () => {
+  if (!formData.temperature || !formData.humidity || !formData.soilMoisture || !formData.soilType) {
+    alert(t.fillRequired);
+    return;
+  }
 
-    try {
-      setCurrentLimit(4);
-      const result = await cropMutation.mutateAsync({ ...formData, limit: 4 });
+  try {
+    setCurrentLimit(4);
+    const result = await cropMutation.mutateAsync({ ...formData, limit: 4 });
+    
+    if (result.recommended_crops && result.recommended_crops.length > 0) {
+      const cropsData = result.recommended_crops.map((cropName, index) => ({
+        id: `crop-${Date.now()}-${index}`,
+        name: cropName.charAt(0).toUpperCase() + cropName.slice(1),
+        rawName: cropName.toLowerCase(),
+        season: t.recommended,
+        yield: t.optimizedConditions,
+      }));
+      setRecommendedCrops(cropsData);
       
-      if (result.recommended_crops && result.recommended_crops.length > 0) {
-        const cropsData = result.recommended_crops.map((cropName, index) => ({
-          id: `crop-${Date.now()}-${index}`,
-          name: cropName.charAt(0).toUpperCase() + cropName.slice(1),
-          rawName: cropName.toLowerCase(),
-          season: t.recommended,
-          yield: t.optimizedConditions,
-        }));
-        setRecommendedCrops(cropsData);
-        
-        fetchCropImages(cropsData);
-        
-        setIsInputModalOpen(false);
-      } else {
-        alert(t.noRecommendations);
+      // NEW: Store diversity score
+      if (result.diversity_score) {
+        setDiversityScore(result.diversity_score);
       }
-    } catch (error) {
-      alert(`Error: ${error.message}`);
+      
+      fetchCropImages(cropsData);
+      setIsInputModalOpen(false);
+    } else {
+      alert(t.noRecommendations);
     }
-  };
+  } catch (error) {
+    alert(`Error: ${error.message}`);
+  }
+};
 
   const fetchCropImages = async (crops) => {
     const newImages = {};
@@ -494,6 +500,13 @@ export default function FarmerPageContent() {
             </motion.button>
           </div>
         </div>
+
+        {/* Diversity Score Display */}
+{diversityScore && recommendedCrops.length > 0 && (
+  <div className="mb-6">
+    <CropDiversityScore diversityData={diversityScore} />
+  </div>
+)}
 
         {recommendedCrops.length === 0 ? (
           <motion.div
