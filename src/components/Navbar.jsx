@@ -19,45 +19,45 @@ const translations = {
   en: {
     home: 'Home',
     services: 'Services',
-    blog: 'Blog',
+    askAI: 'Ask AI',
     contact: 'Contact Us',
     language: 'Language'
   },
   hi: {
     home: 'होम',
     services: 'सेवाएं',
-    blog: 'ब्लॉग',
+    askAI: 'AI से पूछें',
     contact: 'संपर्क करें',
     language: 'भाषा'
   },
   pa: {
     home: 'ਘਰ',
     services: 'ਸੇਵਾਵਾਂ',
-    blog: 'ਬਲੌਗ',
+    askAI: 'AI ਨੂੰ ਪੁੱਛੋ',
     contact: 'ਸੰਪਰਕ ਕਰੋ',
     language: 'ਭਾਸ਼ਾ'
   },
   mr: {
     home: 'मुख्यपृष्ठ',
     services: 'सेवा',
-    blog: 'ब्लॉग',
+    askAI: 'AI ला विचारा',
     contact: 'संपर्क साधा',
     language: 'भाषा'
   },
   bn: {
     home: 'হোম',
     services: 'সেবা',
-    blog: 'ব্লগ',
+    askAI: 'AI কে জিজ্ঞাসা করুন',
     contact: 'যোগাযোগ করুন',
     language: 'ভাষা'
   },
   or: {
-  home: 'ହୋମ୍',
-  services: 'ସେବାଗୁଡିକ',
-  blog: 'ବ୍ଲଗ୍',
-  contact: 'ଯୋଗାଯୋଗ କରନ୍ତୁ',
-  language: 'ଭାଷା'
-}
+    home: 'ହୋମ୍',
+    services: 'ସେବାଗୁଡିକ',
+    askAI: 'AI କୁ ପଚାରନ୍ତୁ',
+    contact: 'ଯୋଗାଯୋଗ କରନ୍ତୁ',
+    language: 'ଭାଷା'
+  }
 };
 
 export default function Navbar() {
@@ -94,7 +94,7 @@ export default function Navbar() {
   };
 
   const handleNavClick = (e, href) => {
-    // Only handle smooth scroll for #services, others will use normal navigation
+    // Only handle smooth scroll for #services
     if (href === '#services') {
       e.preventDefault();
       const element = document.getElementById('services');
@@ -102,23 +102,19 @@ export default function Navbar() {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setIsMobileMenuOpen(false);
       }
-    } else if (href.startsWith('#')) {
-      // For other hash links on same page (home)
-      e.preventDefault();
+    } else {
+      // For all other links (/, /ai), close mobile menu and allow normal navigation
       setIsMobileMenuOpen(false);
     }
-    // For non-hash links (about, project, blog), normal navigation will occur
   };
 
   const t = translations[currentLang];
   const currentLanguage = languages.find(lang => lang.code === currentLang);
 
   const navLinks = [
-    { name: t.home, href: '#home' },
-    { name: t.about, href: '/about' }, // Separate page
+    { name: t.home, href: '/' },
     { name: t.services, href: '#services' }, // Scroll to section
-    { name: t.project, href: '/project' }, // Separate page
-    { name: t.blog, href: '/blog' }, // Separate page
+    { name: t.askAI, href: '/ai' }, // AI page
   ];
 
   return (
@@ -143,7 +139,7 @@ export default function Navbar() {
         >
           {/* Logo */}
           <motion.a
-            href="#home"
+            href="/"
             className="flex items-center gap-1.5 text-gray-900 sm:gap-2"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

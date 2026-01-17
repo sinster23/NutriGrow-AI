@@ -121,7 +121,7 @@ export const cropApi = {
     return response.json();
   },
 
-   getRegionalAdvisory: async (region) => {
+  getRegionalAdvisory: async (region) => {
     const response = await fetch(`${API_BASE_URL}/region-nutrition-advisory`, {
       method: 'POST',
       headers: {
@@ -135,6 +135,31 @@ export const cropApi = {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error.detail || 'Failed to get regional advisory');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Ask AI a question in natural language
+   * @param {Object} data - Question and context
+   * @returns {Promise<Object>} AI response
+   */
+  askAI: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/ask-ai`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question: data.question,
+        context: data.context || {},
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail || 'Failed to get AI response');
     }
 
     return response.json();

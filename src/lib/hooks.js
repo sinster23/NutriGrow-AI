@@ -62,3 +62,15 @@ export const useRegionalAdvisory = () => {
     },
   });
 };
+
+export const useAskAI = () => {
+  return useMutation({
+    mutationFn: cropApi.askAI,
+    onSuccess: (data) => {
+      console.log('AI response received:', data);
+    },
+    onError: (error) => {
+      console.error('Error getting AI response:', error);
+    },
+  });
+};

@@ -11,6 +11,7 @@ import { useRegionalAdvisory } from '@/lib/hooks';
 import RegionalAdvisoryBanner from '@/components/RegionalAdvisoryBanner';
 import CropDiversityScore from '@/components/CropDiversityScore';
 import { getStateFromCity } from '@/utils/locationUtils';
+import Navbar from '@/components/Navbar';
 
 // Custom hook for translation
 const useTranslation = () => {
@@ -332,6 +333,7 @@ const handleSubmit = async () => {
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Work Sans', sans-serif" }}>
+      <Navbar />
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0 }}

@@ -5,6 +5,7 @@ import ServicesSection from '@/components/Services';
 export default function Home() {
   return (
     <main>
+      <Navbar />
       <HeroSection />
       <ServicesSection />
     </main>

@@ -7,6 +7,7 @@ import { useNutritionPlan, useFoodDetails } from '@/lib/hooks';
 import NutritionInputModal from '@/components/NutritionInputModal';
 import FoodDetailsModal from '@/components/FoodDetailsModal';
 import { consumerTranslations } from '@/lib/translations/consumerTranslations';
+import Navbar from '@/components/Navbar';
 
 // Custom hook for translation
 const useTranslation = () => {
@@ -181,6 +182,7 @@ export default function ConsumerPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Work Sans', sans-serif" }}>
+      <Navbar />
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0 }}
