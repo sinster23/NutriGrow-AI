@@ -231,7 +231,7 @@ export default function Navbar() {
 
             {/* Contact Button */}
             <motion.a
-              href="#contact"
+              href="/contact"
               className="hidden items-center gap-1.5 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-emerald-600/30 sm:flex sm:px-4 sm:py-2 sm:text-sm lg:gap-2 lg:px-5 lg:py-2.5"
               whileHover={{
                 scale: 1.05,
